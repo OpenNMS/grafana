@@ -29,6 +29,10 @@ var (
 	// deb & rpm does not support semver so have to handle their version a little differently
 	linuxPackageVersion   string = "v1"
 	linuxPackageIteration string = ""
+	opennmsPackageVersion string = "1.0.0"
+	opennmsPackageIteration string = "rc1"
+	datasourcePluginDir string = "public/app/plugins/datasource"
+	opennmsPluginName string = "opennms"
 	race                  bool
 	workingDir            string
 	serverBinaryName      string = "grafana-server"
@@ -75,6 +79,7 @@ func main() {
 			//verifyGitRepoIsClean()
 			grunt("release")
 			createLinuxPackages()
+                        createOpennmsPackages()
 
 		case "latest":
 			makeLatestDistCopies()
@@ -202,6 +207,8 @@ func createPackage(options linuxPackageOptions) {
 	runPrint("cp", "-p", options.systemdFileSrc, filepath.Join(packageRoot, options.systemdServiceFilePath))
 	// copy release files
 	runPrint("cp", "-a", filepath.Join(workingDir, "tmp")+"/.", filepath.Join(packageRoot, options.homeDir))
+	// remove the opennms plugin
+	runPrint("rm", "-rf", filepath.Join(packageRoot, options.homeDir, datasourcePluginDir, opennmsPluginName))
 	// remove bin path
 	runPrint("rm", "-rf", filepath.Join(packageRoot, options.homeDir, "bin"))
 	// copy sample ini file to /etc/opt/grafana
@@ -238,6 +245,60 @@ func createPackage(options linuxPackageOptions) {
 
 	fmt.Println("Creating package: ", options.packageType)
 	runPrint("fpm", append([]string{"-t", options.packageType}, args...)...)
+}
+
+func createOpennmsPackages() {
+	createOpennmsPackage(linuxPackageOptions{
+                packageType:            "deb",
+                homeDir:                "/usr/share/grafana",
+
+                depends: []string{"grafana"},
+        })
+
+        createOpennmsPackage(linuxPackageOptions{
+                packageType:            "rpm",
+                homeDir:                "/usr/share/grafana",
+
+                depends: []string{"grafana"},
+        })
+}
+
+func createOpennmsPackage(options linuxPackageOptions) {
+        packageRoot, _ := ioutil.TempDir("", "grafana-linux-pack")
+
+        // create directories
+        runPrint("mkdir", "-p", filepath.Join(packageRoot, options.homeDir, datasourcePluginDir))
+
+        // copy plugin files
+        runPrint("cp", "-a", filepath.Join(workingDir, "tmp", datasourcePluginDir, opennmsPluginName), filepath.Join(packageRoot, options.homeDir, datasourcePluginDir))
+
+        args := []string{
+                "-s", "dir",
+                "--description", "Grafana OpenNMS Plugin",
+                "-a", "all",
+                "-C", packageRoot,
+                "--vendor", "OpenNMS",
+                "--url", "http://opennms.org",
+                "--license", "Apache 2.0",
+                "--maintainer", "jesse@opennms.org",
+                "--name", "grafana-opennms-plugin",
+                "--version", opennmsPackageVersion,
+                "-p", "./dist",
+        }
+
+        if linuxPackageIteration != "" {
+                args = append(args, "--iteration", opennmsPackageIteration)
+        }
+
+        // add dependenciesj
+        for _, dep := range options.depends {
+                args = append(args, "--depends", dep)
+        }
+
+        args = append(args, ".")
+
+        fmt.Println("Creating package: ", options.packageType)
+        runPrint("fpm", append([]string{"-t", options.packageType}, args...)...)
 }
 
 func verifyGitRepoIsClean() {
