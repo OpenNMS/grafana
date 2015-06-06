@@ -46,12 +46,13 @@ function (angular, _, kbn) {
         });
       };
 
-      OpenNMSDatasource.prototype.annotationQuery = function(annotation, rangeUnparsed) {
-        var from = convertToTimestamp(rangeUnparsed.from);
+      OpenNMSDatasource.prototype.annotationQuery = function(annotation, range) {
+        // The /event ReST endpoint expects ISO-8601 formatted dates
+        var begin = new Date(convertToTimestamp(range.from)).toISOString();
+        var end = new Date(convertToTimestamp(range.to)).toISOString();
 
-        // TODO: We can't filter events in a range a time
-        // var to = convertToTimestamp(rangeUnparsed.to);
-        var request = this._onmsRequest('GET', '/rest/events?node.id=' + annotation.nodeId + '&eventTime=' + from + '&comparator=ge&orderBy=eventTime&order=desc&limit=100');
+        // Grab all of the events (limit=0) for the node in the given range
+        var request = this._onmsRequest('GET', '/rest/events/between?begin=' + begin +'&end=' + end + '&node.id=' + annotation.nodeId + '&orderBy=eventTime&order=asc&limit=0');
         return $q.when(request).then(function (response) {
           var annotations = [];
 
