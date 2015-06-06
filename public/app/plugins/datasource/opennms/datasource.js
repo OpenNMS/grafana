@@ -20,9 +20,6 @@ function (angular, _, kbn) {
         this.basicAuth = datasource.basicAuth;
         this.withCredentials = datasource.withCredentials;
         this.searchLimit = 25;
-
-        this.supportMetrics = true;
-        this.editorSrc = 'app/features/opennms/partials/query.editor.html';
       }
 
       // Called once per panel (graph)
@@ -35,7 +32,7 @@ function (angular, _, kbn) {
         // Make the request
         var request;
         if (query.source.length > 0) {
-          // Only make the request if there is at lease one source
+          // Only make the request if there is at least one source
           request = this._onmsRequest('POST', '/rest/measurements', query);
         } else {
           // Otherwise return an empty set of measurements
@@ -46,6 +43,30 @@ function (angular, _, kbn) {
         // Process the results
         return $q.when(request).then(function (response) {
           return _this._processResponse(response);
+        });
+      };
+
+      OpenNMSDatasource.prototype.annotationQuery = function(annotation, rangeUnparsed) {
+        var from = convertToTimestamp(rangeUnparsed.from);
+
+        // TODO: We can't filter events in a range a time
+        // var to = convertToTimestamp(rangeUnparsed.to);
+        var request = this._onmsRequest('GET', '/rest/events?node.id=' + annotation.nodeId + '&eventTime=' + from + '&comparator=ge&orderBy=eventTime&order=desc&limit=100');
+        return $q.when(request).then(function (response) {
+          var annotations = [];
+
+          var event, i, n = response.event.length;
+          for (i = 0; i < n; i++) {
+            event = response.event[i];
+
+            annotations.push({
+              annotation: annotation,
+              time: event.time,
+              title: event.uei + " on " + event.nodeLabel
+            });
+          }
+
+          return annotations;
         });
       };
 
