@@ -34,6 +34,7 @@ pages:
 - ['installation/docker.md', 'Installation', 'Installing on Docker']
 
 - ['installation/configuration.md', 'Installation', 'Configuration']
+- ['installation/ldap.md', 'Installation', 'LDAP Integration']
 - ['installation/provisioning.md', 'Installation', 'Provisioning']
 - ['installation/performance.md', 'Installation', 'Performance tips']
 - ['installation/troubleshooting.md', 'Installation', 'Troubleshooting']
@@ -41,11 +42,12 @@ pages:
 
 - ['guides/gettingstarted.md', 'User Guides', 'Getting started']
 - ['guides/whats-new-in-v2.md', 'User Guides', "What's New in Grafana v2.0"]
+- ['guides/whats-new-in-v2-1.md', 'User Guides', "What's New in Grafana v2.1"]
 - ['guides/screencasts.md', 'User Guides', 'Screencasts']
 
 - ['reference/graph.md', 'Reference', 'Graph Panel']
 - ['reference/singlestat.md', 'Reference', 'Singlestat Panel']
-- ['reference/dashlist.md', 'Reference', 'Dashlist Panel']
+- ['reference/dashlist.md', 'Reference', 'Dashboard list Panel']
 - ['reference/sharing.md', 'Reference', 'Sharing']
 - ['reference/annotations.md', 'Reference', 'Annotations']
 - ['reference/timerange.md', 'Reference', 'Time range controls']
@@ -60,8 +62,9 @@ pages:
 - ['datasources/graphite.md', 'Data Sources', 'Graphite']
 - ['datasources/influxdb.md', 'Data Sources', 'InfluxDB']
 - ['datasources/opentsdb.md', 'Data Sources', 'OpenTSDB']
+- ['datasources/kairosdb.md', 'Data Sources', 'KairosDB']
 
-- ['project/building_from_source.md', 'Project', 'Building from souce']
+- ['project/building_from_source.md', 'Project', 'Building from source']
 - ['project/cla.md', 'Project', 'Contributor License Agreement']
 
 - ['jsearch.md', '**HIDDEN**']

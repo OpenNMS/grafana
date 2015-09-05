@@ -1,17 +1,12 @@
 define([
-  'helpers',
   'features/dashboard/dashboardSrv'
-], function(helpers) {
+], function() {
   'use strict';
 
   describe('dashboardSrv', function() {
     var _dashboardSrv;
-    var contextSrv = new helpers.ContextSrvStub();
 
     beforeEach(module('grafana.services'));
-    beforeEach(module(function($provide) {
-      $provide.value('contextSrv', contextSrv);
-    }));
 
     beforeEach(inject(function(dashboardSrv) {
       _dashboardSrv = dashboardSrv;
@@ -29,7 +24,7 @@ define([
       });
 
       it('should have meta', function() {
-        expect(model.meta.canSave).to.be(false);
+        expect(model.meta.canSave).to.be(true);
         expect(model.meta.canShare).to.be(true);
       });
 
@@ -84,6 +79,15 @@ define([
         expect(dashboard.rows[0].panels[1].span).to.be(4);
         expect(dashboard.rows[0].panels[1].attr).to.be('123');
         expect(dashboard.rows[0].panels[1].id).to.be(11);
+      });
+
+      it('duplicate panel should remove repeat data', function() {
+        var panel = { span: 4, attr: '123', id: 10, repeat: 'asd', scopedVars: { test: 'asd' }};
+        dashboard.rows = [{ panels: [panel] }];
+        dashboard.duplicatePanel(panel, dashboard.rows[0]);
+
+        expect(dashboard.rows[0].panels[1].repeat).to.be(undefined);
+        expect(dashboard.rows[0].panels[1].scopedVars).to.be(undefined);
       });
 
     });
@@ -185,10 +189,26 @@ define([
         expect(model.annotations.list.length).to.be(0);
         expect(model.templating.list.length).to.be(0);
       });
-
     });
 
+    describe('Given editable false dashboard', function() {
+      var model;
+
+      beforeEach(function() {
+        model = _dashboardSrv.create({
+          editable:  false,
+        });
+      });
+
+      it('Should set meta canEdit and canSave to false', function() {
+        expect(model.meta.canSave).to.be(false);
+        expect(model.meta.canEdit).to.be(false);
+      });
+
+      it('getSaveModelClone should remove meta', function() {
+        var clone = model.getSaveModelClone();
+        expect(clone.meta).to.be(undefined);
+      });
+    });
   });
-
-
 });

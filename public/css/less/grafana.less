@@ -184,11 +184,11 @@
   position : absolute;
   top: -1000;
   left: 0;
-  color: #c8c8c8;
+  color: @tooltipColor;
   padding: 10px;
   font-size: 11pt;
   font-weight : 200;
-  background-color: rgb(58, 57, 57);
+  background-color: @tooltipBackground;
   border-radius: 5px;
   z-index: 9999;
   max-width: 800px;
@@ -317,7 +317,7 @@
     margin: 10px 105px;
     strong {
       color: @headingsColor;
-      font-weight: bold;
+      font-weight: 500;
     }
   }
 
@@ -337,3 +337,22 @@
     text-overflow: ellipsis;
   }
 }
+
+.query-keyword {
+  font-weight: bold;
+  color: @blue;
+}
+
+.query-segment-key {
+  border-right: none;
+  padding-right: 1px;
+}
+
+.query-segment-operator {
+  padding-right: 1px;
+  border-right: none;
+  color: @orange;
+}
+
+
+

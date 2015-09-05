@@ -29,7 +29,7 @@ function (angular, app, $, _, kbn, moment, TimeSeries, PanelMeta) {
       panelName: 'Graph',
       editIcon:  "fa fa-bar-chart",
       fullscreen: true,
-      metricsEditor: true
+      metricsEditor: true,
     });
 
     $scope.panelMeta.addEditorTab('Axes & Grid', 'app/panels/graph/axisEditor.html');
@@ -116,7 +116,7 @@ function (angular, app, $, _, kbn, moment, TimeSeries, PanelMeta) {
     _.defaults($scope.panel.grid, _d.grid);
     _.defaults($scope.panel.legend, _d.legend);
 
-    $scope.logScales = {'linear': 1, 'log (base 10)': 10, 'log (base 32)': 32, 'log (base 1024)': 1024};
+    $scope.logScales = {'linear': 1, 'log (base 2)': 2, 'log (base 10)': 10, 'log (base 32)': 32, 'log (base 1024)': 1024};
 
     $scope.hiddenSeries = {};
     $scope.seriesList = [];
@@ -175,7 +175,8 @@ function (angular, app, $, _, kbn, moment, TimeSeries, PanelMeta) {
     $scope.seriesHandler = function(seriesData, index) {
       var datapoints = seriesData.datapoints;
       var alias = seriesData.target;
-      var color = $scope.panel.aliasColors[alias] || $rootScope.colors[index];
+      var colorIndex = index % $rootScope.colors.length;
+      var color = $scope.panel.aliasColors[alias] || $rootScope.colors[colorIndex];
 
       var series = new TimeSeries({
         datapoints: datapoints,
@@ -197,7 +198,7 @@ function (angular, app, $, _, kbn, moment, TimeSeries, PanelMeta) {
     };
 
     $scope.render = function(data) {
-      $scope.$broadcast('render', data);
+      panelHelper.broadcastRender($scope, data);
     };
 
     $scope.changeSeriesColor = function(series, color) {

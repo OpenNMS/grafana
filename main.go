@@ -12,9 +12,12 @@ import (
 
 	"github.com/grafana/grafana/pkg/cmd"
 	"github.com/grafana/grafana/pkg/log"
+	"github.com/grafana/grafana/pkg/login"
 	"github.com/grafana/grafana/pkg/metrics"
 	"github.com/grafana/grafana/pkg/plugins"
 	"github.com/grafana/grafana/pkg/services/eventpublisher"
+	"github.com/grafana/grafana/pkg/services/notifications"
+	"github.com/grafana/grafana/pkg/services/search"
 	"github.com/grafana/grafana/pkg/services/sqlstore"
 	"github.com/grafana/grafana/pkg/setting"
 	"github.com/grafana/grafana/pkg/social"
@@ -51,9 +54,15 @@ func main() {
 	writePIDFile()
 	initRuntime()
 
+	search.Init()
+	login.Init()
 	social.NewOAuthService()
 	eventpublisher.Init()
 	plugins.Init()
+
+	if err := notifications.Init(); err != nil {
+		log.Fatal(3, "Notification service failed to initialize", err)
+	}
 
 	if setting.ReportingEnabled {
 		go metrics.StartUsageReportLoop()

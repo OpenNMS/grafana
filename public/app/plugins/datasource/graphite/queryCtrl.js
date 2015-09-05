@@ -20,14 +20,21 @@ function (angular, _, config, gfunc, Parser) {
       parseTarget();
     };
 
+    $scope.toggleEditorMode = function() {
+      $scope.target.textEditor = !$scope.target.textEditor;
+      parseTarget();
+    };
+
     // The way parsing and the target editor works needs
     // to be rewritten to handle functions that take multiple series
     function parseTarget() {
       $scope.functions = [];
       $scope.segments = [];
-      $scope.showTextEditor = false;
-
       delete $scope.parserError;
+
+      if ($scope.target.textEditor) {
+        return;
+      }
 
       var parser = new Parser($scope.target.target);
       var astNode = parser.getAst();
@@ -38,7 +45,7 @@ function (angular, _, config, gfunc, Parser) {
 
       if (astNode.type === 'error') {
         $scope.parserError = astNode.message + " at position: " + astNode.pos;
-        $scope.showTextEditor = true;
+        $scope.target.textEditor = true;
         return;
       }
 
@@ -48,7 +55,7 @@ function (angular, _, config, gfunc, Parser) {
       catch (err) {
         console.log('error parsing target:', err.message);
         $scope.parserError = err.message;
-        $scope.showTextEditor = true;
+        $scope.target.textEditor = true;
       }
 
       checkOtherSegments($scope.segments.length - 1);
@@ -152,23 +159,18 @@ function (angular, _, config, gfunc, Parser) {
     }
 
     $scope.getAltSegments = function (index) {
-      $scope.altSegments = [];
-
       var query = index === 0 ?  '*' : getSegmentPathUpTo(index) + '.*';
 
-      return $scope.datasource.metricFindQuery(query)
-        .then(function(segments) {
-          $scope.altSegments = _.map(segments, function(segment) {
+      return $scope.datasource.metricFindQuery(query).then(function(segments) {
+          var altSegments = _.map(segments, function(segment) {
             return new MetricSegment({ value: segment.text, expandable: segment.expandable });
           });
 
-          if ($scope.altSegments.length === 0) {
-            return;
-          }
+          if (altSegments.length === 0) { return altSegments; }
 
           // add template variables
           _.each(templateSrv.variables, function(variable) {
-            $scope.altSegments.unshift(new MetricSegment({
+            altSegments.unshift(new MetricSegment({
               type: 'template',
               value: '$' + variable.name,
               expandable: true,
@@ -176,10 +178,12 @@ function (angular, _, config, gfunc, Parser) {
           });
 
           // add wildcard option
-          $scope.altSegments.unshift(new MetricSegment('*'));
+          altSegments.unshift(new MetricSegment('*'));
+          return altSegments;
         })
         .then(null, function(err) {
           $scope.parserError = err.message || 'Failed to issue metric query';
+          return [];
         });
     };
 
