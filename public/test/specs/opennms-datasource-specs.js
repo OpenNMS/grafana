@@ -57,6 +57,13 @@ define([
 
     });
 
+    describe('When testing for connectivity', function () {
+      it('should make a request to /rest/info', function () {
+        ctx.$httpBackend.expect('GET', "/rest/info").respond({});
+        ctx.ds.testDatasource();
+        ctx.$httpBackend.flush();
+        ctx.$httpBackend.verifyNoOutstandingExpectation();
+      });
+    });
   });
-
 });

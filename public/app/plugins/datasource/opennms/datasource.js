@@ -49,6 +49,12 @@ function (angular, _, kbn) {
         });
       };
 
+      OpenNMSDatasource.prototype.testDatasource = function() {
+        return this._onmsRequest('GET', '/rest/info').then(function () {
+          return { status: "success", message: "Data source is working", title: "Success" };
+        });
+      };
+
       /**
        * Combines all the targets in the panel in a single query,
        * this allows us to make a single round-trip, and take advantage of compression.

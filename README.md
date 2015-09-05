@@ -15,3 +15,13 @@ Refer to the Grafana's documentation for details on building from source.
 ```
 go run build.go build package
 ```
+
+## Changelog
+
+### v1.1.0
+
+* Added support for testing the datasource, introduced in Grafana 2.1.0
+
+### v1.0.0-rc1
+
+* Initial datasource implementation
