@@ -20,7 +20,7 @@ go run build.go build package
 
 ### v1.1.0
 
-* Added support for single-valued template variables
+* Added support for both single-valued and multi-valued template variables
 * Added support for testing the datasource, introduced in Grafana 2.1.0
 
 ### v1.0.0-rc1

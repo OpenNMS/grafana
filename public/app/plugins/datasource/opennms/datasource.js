@@ -87,31 +87,138 @@ function (angular, _, kbn) {
               label = target.attribute;
             }
 
-            // Build the source, performing variable substitution via templateSrv
-            query.source.push({
+            // Build the source
+            var source = {
               "aggregation": target.aggregation,
-              "attribute": templateSrv.replace(target.attribute),
-              "label": templateSrv.replace(label),
-              "resourceId": templateSrv.replace(_this._getRemoteResourceId(target.nodeId, target.resourceId)),
+              "attribute": target.attribute,
+              "label": label,
+              "resourceId": _this._getRemoteResourceId(target.nodeId, target.resourceId),
               "transient": transient
-            });
+            };
 
+            // Perform variable substitution - may generate additional queries
+            query.source = query.source.concat(_this._interpolateSourceVariables(source));
           } else if (target.type === "expression") {
             if (!((target.label && target.expression))) {
               return;
             }
 
-            // Build the expression, performing variable substitution via templateSrv
-            query.expression.push({
+            // Build the expression
+            var expression = {
               "label": templateSrv.replace(target.label),
               "value": templateSrv.replace(target.expression),
               "transient": transient
-            });
+            };
 
+            // Perform variable substitution - may generate additional expressions
+            query.expression = query.expression.concat(_this.__interpolateExpressionVariables(expression));
           }
         });
 
         return query;
+      };
+
+      OpenNMSDatasource.prototype._interpolateSourceVariables = function(source) {
+        return this.__interpolateVariables(source, ['resourceId', 'attribute', 'label']);
+      };
+
+      OpenNMSDatasource.prototype.__interpolateExpressionVariables = function(expression) {
+        return this.__interpolateVariables(expression, ['value', 'label']);
+      };
+
+      OpenNMSDatasource.prototype.__interpolateVariables = function(query, keys) {
+
+        // Collect the list of variables that are referenced in one or more of the keys
+        var referencedVariables = [];
+        _.each(templateSrv.variables, function(variable) {
+          var isVariableReferenced = _.find(keys, function(key) {
+            return templateSrv.containsVariable(query[key], variable.name);
+          });
+          if (isVariableReferenced) {
+            referencedVariables.push(variable);
+          }
+        });
+
+        // No variables are referenced, return the query as-is
+        if (referencedVariables.length === 0) {
+          return [query];
+        }
+
+        // Generate permutations of the variables
+        var cartesianProductOfVariables = this._cartesianVariables(referencedVariables);
+
+        // Build the resulting queries, performing the required variable substitution
+        var queries = [];
+        _.each(cartesianProductOfVariables, function(rowOfReferencedVariables) {
+
+          var mapOfReferencedVariables = {};
+          _.each(rowOfReferencedVariables, function(variable) {
+            mapOfReferencedVariables[variable.name] = {'value': variable.current.value};
+          });
+
+          var q = _.clone(query);
+          _.each(keys, function(key) {
+            q[key] = templateSrv.replace(q[key], mapOfReferencedVariables);
+          });
+
+          queries.push(q);
+        });
+
+        return queries;
+      };
+
+      OpenNMSDatasource.prototype._cartesianVariables = function(variables) {
+        // Collect the values from all of the variables
+        var allValues = [];
+        _.each(variables, function(variable) {
+          var values;
+
+          // Single-valued?
+          if (_.isString(variable.current.value)) {
+            values = [variable.current.value];
+          } else {
+            values = variable.current.value;
+          }
+
+          allValues.push(values);
+        });
+
+        // Generate the cartesian product
+        var productOfAllValues = this._cartesian(allValues);
+
+        // Rebuild the variables
+        var productOfAllVariables = [];
+        _.each(productOfAllValues, function(rowOfValues) {
+          var rowOfVariables = [];
+          for (var i = 0, l = variables.length; i<l; i++) {
+            // Deep clone
+            var variable = JSON.parse(JSON.stringify(variables[i]));
+            variable.current.value = rowOfValues[i];
+            rowOfVariables.push(variable);
+          }
+          productOfAllVariables.push(rowOfVariables);
+        });
+
+        return productOfAllVariables;
+      };
+
+      OpenNMSDatasource.prototype._cartesian = function(arrays) {
+        // Based on the code from http://stackoverflow.com/questions/15298912/
+        // javascript-generating-combinations-from-n-arrays-with-m-elements
+        var r = [], max = arrays.length-1;
+        function helper(arr, i) {
+          for (var j=0, l=arrays[i].length; j<l; j++) {
+            var a = arr.slice(0); // clone arr
+            a.push(arrays[i][j]);
+            if (i===max) {
+              r.push(a);
+            } else {
+              helper(a, i+1);
+            }
+          }
+        }
+        helper([], 0);
+        return r;
       };
 
       OpenNMSDatasource.prototype._processResponse = function (response) {

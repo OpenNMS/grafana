@@ -95,7 +95,78 @@ define([
         expect(request.source.length).to.be(1);
         expect(request.source[0].attribute).to.be("loadavg1");
       });
+
+      it('should generate multiple sources for multi-valued template variables', function () {
+        ctx.templateSrv.init([
+          { name: 'v1', current: { value: ['1', '2'] }},
+          { name: 'v2', current: { value: ['x', 'y'] }}
+        ]);
+
+        var query = {
+          range: {from: 'now-1h', to: 'now'},
+          targets: [{type:"attribute", nodeId: '1', resourceId: 'nodeSnmp[]', attribute: '$v1-$v2', aggregation: 'AVERAGE'}],
+          interval: '1s'
+        };
+
+        ctx.ds.query(query);
+
+        ctx.$httpBackend.flush();
+        ctx.$httpBackend.verifyNoOutstandingExpectation();
+
+        expect(request.source.length).to.be(4);
+        expect(request.source[0].attribute).to.be("1-x");
+        expect(request.source[1].attribute).to.be("1-y");
+        expect(request.source[2].attribute).to.be("2-x");
+        expect(request.source[3].attribute).to.be("2-y");
+      });
     });
 
+    describe('Cartesian products', function () {
+      it('should work with a single single-valued variable', function () {
+        var results = ctx.ds._cartesianVariables([{ name: 'variable', current: { value: 'loadavg1'}}]);
+        expect(results.length).to.be(1);
+
+        expect(results[0][0].name).to.be('variable');
+        expect(results[0][0].current.value).to.be('loadavg1');
+      });
+
+      it('should work with a single multi-valued variable', function () {
+        var results = ctx.ds._cartesianVariables([{ name: 'variable', current: { value: ['loadavg1', 'loadavg5'] }}]);
+        expect(results.length).to.be(2);
+        expect(results[0][0].name).to.be('variable');
+        expect(results[0][0].current.value).to.be('loadavg1');
+
+        expect(results[1][0].name).to.be('variable');
+        expect(results[1][0].current.value).to.be('loadavg5');
+      });
+
+      it('should work with multiple multi-valued variables', function () {
+        var results = ctx.ds._cartesianVariables([
+          { name: 'x', current: { value: ['1', '2'] }},
+          { name: 'y', current: { value: ['A', 'B'] }}
+        ]);
+        expect(results.length).to.be(4);
+
+        expect(results[0][0].name).to.be('x');
+        expect(results[0][0].current.value).to.be('1');
+        expect(results[0][1].name).to.be('y');
+        expect(results[0][1].current.value).to.be('A');
+
+        expect(results[1][0].name).to.be('x');
+        expect(results[1][0].current.value).to.be('1');
+        expect(results[1][1].name).to.be('y');
+        expect(results[1][1].current.value).to.be('B');
+
+        expect(results[2][0].name).to.be('x');
+        expect(results[2][0].current.value).to.be('2');
+        expect(results[2][1].name).to.be('y');
+        expect(results[2][1].current.value).to.be('A');
+
+        expect(results[3][0].name).to.be('x');
+        expect(results[3][0].current.value).to.be('2');
+        expect(results[3][1].name).to.be('y');
+        expect(results[3][1].current.value).to.be('B');
+      });
+    });
   });
 });
