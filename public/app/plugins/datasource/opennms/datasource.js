@@ -11,7 +11,7 @@ function (angular, _, kbn) {
 
     var module = angular.module('grafana.services');
 
-    module.factory('OpenNMSDatasource', function ($q, $http) {
+    module.factory('OpenNMSDatasource', function ($q, $http, templateSrv) {
 
       function OpenNMSDatasource(datasource) {
         this.type = 'opennms';
@@ -87,23 +87,27 @@ function (angular, _, kbn) {
               label = target.attribute;
             }
 
+            // Build the source, performing variable substitution via templateSrv
             query.source.push({
               "aggregation": target.aggregation,
-              "attribute": target.attribute,
-              "label": label,
-              "resourceId": _this._getRemoteResourceId(target.nodeId, target.resourceId),
+              "attribute": templateSrv.replace(target.attribute),
+              "label": templateSrv.replace(label),
+              "resourceId": templateSrv.replace(_this._getRemoteResourceId(target.nodeId, target.resourceId)),
               "transient": transient
             });
+
           } else if (target.type === "expression") {
             if (!((target.label && target.expression))) {
               return;
             }
 
+            // Build the expression, performing variable substitution via templateSrv
             query.expression.push({
-              "label": target.label,
-              "value": target.expression,
+              "label": templateSrv.replace(target.label),
+              "value": templateSrv.replace(target.expression),
               "transient": transient
             });
+
           }
         });
 

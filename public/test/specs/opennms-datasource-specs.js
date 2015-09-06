@@ -8,10 +8,12 @@ define([
     var ctx = new helpers.ServiceTestContext();
 
     beforeEach(module('grafana.services'));
-    beforeEach(ctx.providePhase(['templateSrv']));
+    beforeEach(inject(function(templateSrv) {
+      ctx.templateSrv = templateSrv;
+    }));
     beforeEach(ctx.createService('OpenNMSDatasource'));
     beforeEach(function () {
-      ctx.ds = new ctx.service({url: [''], user: 'test', password: 'mupp'});
+      ctx.ds = new ctx.service({url: [''], user: 'test', password: 'test'});
     });
 
     describe('When querying OpenNMS with one target', function () {
@@ -65,5 +67,35 @@ define([
         ctx.$httpBackend.verifyNoOutstandingExpectation();
       });
     });
+
+    describe('When using templates', function () {
+      var request;
+
+      beforeEach(function () {
+        ctx.$httpBackend.expect('POST', "/rest/measurements").respond(function(method, url, json) {
+          request = JSON.parse(json);
+          return {};
+        });
+      });
+
+      it('should perform simple variable substitution', function () {
+        ctx.templateSrv.init([{ name: 'variable', current: { value: 'loadavg1' }}]);
+
+        var query = {
+          range: {from: 'now-1h', to: 'now'},
+          targets: [{type:"attribute", nodeId: '1', resourceId: 'nodeSnmp[]', attribute: '$variable', aggregation: 'AVERAGE'}],
+          interval: '1s'
+        };
+
+        ctx.ds.query(query);
+
+        ctx.$httpBackend.flush();
+        ctx.$httpBackend.verifyNoOutstandingExpectation();
+
+        expect(request.source.length).to.be(1);
+        expect(request.source[0].attribute).to.be("loadavg1");
+      });
+    });
+
   });
 });
