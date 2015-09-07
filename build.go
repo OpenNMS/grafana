@@ -29,8 +29,8 @@ var (
 	// deb & rpm does not support semver so have to handle their version a little differently
 	linuxPackageVersion   string = "v1"
 	linuxPackageIteration string = ""
-	opennmsPackageVersion string = "1.0.0"
-	opennmsPackageIteration string = "rc1"
+	opennmsPackageVersion string = "1.1.0"
+	opennmsPackageIteration string = ""
 	datasourcePluginDir string = "public/app/plugins/datasource"
 	opennmsPluginName string = "opennms"
 	race                  bool
@@ -258,14 +258,14 @@ func createOpennmsPackages() {
                 packageType:            "deb",
                 homeDir:                "/usr/share/grafana",
 
-                depends: []string{"grafana"},
+                depends: []string{"grafana > 2.1.0"},
         })
 
         createOpennmsPackage(linuxPackageOptions{
                 packageType:            "rpm",
                 homeDir:                "/usr/share/grafana",
 
-                depends: []string{"grafana"},
+                depends: []string{"grafana > 2.1.0"},
         })
 }
 
