@@ -105,8 +105,8 @@ function (angular, _, kbn) {
 
             // Build the expression
             var expression = {
-              "label": templateSrv.replace(target.label),
-              "value": templateSrv.replace(target.expression),
+              "label": target.label,
+              "value": target.expression,
               "transient": transient
             };
 
