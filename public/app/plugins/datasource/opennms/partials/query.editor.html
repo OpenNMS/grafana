@@ -56,7 +56,7 @@
                     <a class="tight-form-item"
                        ng-click="target.hide = !target.hide; get_data();"
                        role="menuitem">
-                        <i class="fa fa-eye"></i>
+                        <i class="fa fa-eye" ng-class="{invisible: target.type === 'filter'}"></i>
                     </a>
                 </li>
             </ul>
@@ -349,7 +349,6 @@
                 <li>Within the expression, you can refer to other queries using their name, however these must not contain any spaces.</li>
             </ul>
         </div>
-
     </div>
 </div>
 

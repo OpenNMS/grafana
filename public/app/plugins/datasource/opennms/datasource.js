@@ -74,7 +74,8 @@ function (angular, _, kbn) {
           "step": Math.max(kbn.interval_to_ms(options.interval), 1),
           "maxrows": options.maxDataPoints,
           "source": [],
-          "expression": []
+          "expression": [],
+          "filter": []
         };
 
         _.each(options.targets, function (target) {
@@ -118,6 +119,28 @@ function (angular, _, kbn) {
 
             // Perform variable substitution - may generate additional expressions
             query.expression = query.expression.concat(_this.__interpolateExpressionVariables(expression));
+          } else if (target.type === "filter") {
+            if (!((target.filter))) {
+              return;
+            }
+
+            // Build the filter
+            var parameters = [];
+
+            _.each(target.filterParameters, function(value, key) {
+              parameters.push({
+                'key': key,
+                'value': value
+              });
+            });
+
+            var filter = {
+              "name": target.filter.name,
+              "parameter": parameters
+            };
+
+            // Perform variable substitution - may generate additional expressions
+            query.filter = query.filter.concat(filter);
           }
         });
 
