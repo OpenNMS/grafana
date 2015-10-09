@@ -128,6 +128,11 @@ function (angular, _, kbn) {
             var parameters = [];
 
             _.each(target.filterParameters, function(value, key) {
+              // Skip parameters with undefined or empty values
+              if (value === undefined || value === '' || value === null) {
+                return;
+              }
+
               parameters.push({
                 'key': key,
                 'value': value

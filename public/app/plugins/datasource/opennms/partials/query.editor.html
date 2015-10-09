@@ -318,6 +318,11 @@
                     expressions
                 </a>
             </li>
+            <li class="tight-form-item">
+                <a ng-click="toggleEditorHelp(4)" bs-tooltip="'click to show helpful info'" data-placement="bottom">
+                    filters
+                </a>
+            </li>
         </ul>
         <div class="clearfix"></div>
     </div>
@@ -347,8 +352,17 @@
             <ul>
                 <li>Expressions can be used to perform calculations or simple manipulation on previous queries.</li>
                 <li>Within the expression, you can refer to other queries using their name, however these must not contain any spaces.</li>
+                <li>Values that were typically stored in strings.attributes can be reference using $label.$property i.e. ifInOctets.ifSpeed</li>
             </ul>
         </div>
+
+        <div class="grafana-info-box span6" ng-if="editorHelpIndex === 4">
+            <h5>Filters</h5>
+            <ul>
+                <li>Filters do not support templated values.</li>
+                <li>Filters using the R backend required 'Rscript' to be available on OpenNMS server's system path.</li>
+            </ul>
+        </div>
+
     </div>
 </div>
-
