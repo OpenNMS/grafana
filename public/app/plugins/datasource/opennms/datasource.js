@@ -55,6 +55,12 @@ function (angular, _, kbn) {
         });
       };
 
+      OpenNMSDatasource.prototype.metricFindQuery = function (options) {
+        var deferred = $q.defer();
+        deferred.resolve([]);
+        return deferred.promise;
+      };
+
       /**
        * Combines all the targets in the panel in a single query,
        * this allows us to make a single round-trip, and take advantage of compression.
