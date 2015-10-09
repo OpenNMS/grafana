@@ -177,7 +177,7 @@ define([
 
       $scope.openFilterSelectionModal = function () {
         var modalScope = $scope.$new(true);
-        modalScope.search = function (query) {
+        modalScope.search = function () {
           return $scope.datasource
               .getAvailableFilters()
               .then(function (filters) {
