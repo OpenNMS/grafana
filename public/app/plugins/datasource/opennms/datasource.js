@@ -89,7 +89,7 @@ function (angular, _, kbn) {
             }
 
             var label = target.label;
-            if (label === undefined) {
+            if (label === undefined || label === '') {
               label = target.attribute;
             }
 
