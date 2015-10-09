@@ -24,9 +24,21 @@
                         </a>
                         <ul class="dropdown-menu pull-right" role="menu">
                             <li role="menuitem">
-                                <a tabindex="1"
-                                   ng-click="duplicate()">
+                                <a  tabindex="1"
+                                    ng-click="duplicate()">
                                     Duplicate
+                                </a>
+                            </li>
+                            <li role="menuitem">
+                                <a  tabindex="1"
+                                    ng-click="moveMetricQuery($index, $index-1)">
+                                    Move up
+                                </a>
+                            </li>
+                            <li role="menuitem">
+                                <a  tabindex="1"
+                                    ng-click="moveMetricQuery($index, $index+1)">
+                                    Move down
                                 </a>
                             </li>
                         </ul>
