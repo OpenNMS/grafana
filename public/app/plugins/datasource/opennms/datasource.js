@@ -373,6 +373,12 @@ function (angular, _, kbn) {
         });
       };
 
+      OpenNMSDatasource.prototype.getAvailableFilters = function () {
+        return this._onmsRequest('GET', '/rest/measurements/filters').then(function (data) {
+          return data;
+        });
+      };
+
       function convertToTimestamp(date) {
         if (date === 'now') {
           date = new Date();

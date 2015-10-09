@@ -73,11 +73,72 @@
                                 ng-blur="targetBlur()">
                             <option value="attribute">Attribute</option>
                             <option value="expression">Expression</option>
+                            <option value="filter">Filter</option>
                         </select>
                     </li>
                 </ul>
 
                 <div class="clearfix"></div>
+            </div>
+
+            <div ng-show="target.type === 'filter'">
+
+                <ul class="tight-form-list">
+                    <li class="tight-form-item">
+                        <i class="fa fa-eye invisible"></i>
+                    </li>
+
+                    <li>
+                        <a class="tight-form-item  query-keyword" style="width: 105px;"
+                           ng-click="openFilterSelectionModal();"
+                           role="menuitem">
+                            Filter <i class="fa fa-filter"></i>
+                        </a>
+                    </li>
+
+                    <li>
+                        <input type="text"
+                               class="tight-form-input input-xlarge"
+                               ng-model="target.filter.name"
+                               spellcheck='false'
+
+                               placeholder="filter type name"
+                               data-min-length=0 data-items=100
+                               ng-blur="targetBlur()"
+                                >
+                    </li>
+
+                    <div class="clearfix"></div>
+
+                    <div data-ng-repeat="param in target.filter.parameter">
+                        <ul class="tight-form-list">
+                            <li class="tight-form-item">
+                                <i class="fa fa-eye invisible"></i>
+                            </li>
+
+                            <li class="tight-form-item query-keyword" style="width: 105px;">
+                                {{ param.displayName }}
+                            </li>
+
+                            <li>
+                                <input type="text"
+                                       class="tight-form-input input-xlarge"
+                                       ng-model="target.filterParameters[param.key]"
+                                       spellcheck='false'
+                                       placeholder="{{ param.default != null ? param.default : '' }}"
+                                       data-min-length=0 data-items=100
+                                       ng-blur="targetBlur()"
+                                        >
+                            </li>
+
+                            <li class="help-block" style="margin-left: 5px">
+                                {{ param.description }}
+                            </li>
+                        </ul>
+
+                        <div class="clearfix"></div>
+                    </div>
+                </ul>
             </div>
 
             <div ng-show="target.type === 'expression'">
@@ -213,21 +274,23 @@
                 </div>
             </div>
 
-            <ul class="tight-form-list pull-right">
-                <li class="tight-form-item">
-                    Label <i class="fa fa-font"></i>
-                </li>
-                <li>
-                    <input type="text"
-                           class="tight-form-input input-large"
-                           ng-model="target.label"
-                           spellcheck='false'
-                           placeholder="series label"
-                           data-min-length=0 data-items=100
-                           ng-blur="targetBlur()"
-                            />
-                </li>
-            </ul>
+            <div ng-show="target.type !== 'filter'">
+                <ul class="tight-form-list pull-right">
+                    <li class="tight-form-item">
+                        Label <i class="fa fa-font"></i>
+                    </li>
+                    <li>
+                        <input type="text"
+                               class="tight-form-input input-large"
+                               ng-model="target.label"
+                               spellcheck='false'
+                               placeholder="series label"
+                               data-min-length=0 data-items=100
+                               ng-blur="targetBlur()"
+                                />
+                    </li>
+                </ul>
+            </div>
 
             <div class="clearfix"></div>
         </div>

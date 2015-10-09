@@ -175,9 +175,46 @@ define([
         });
       };
 
+      $scope.openFilterSelectionModal = function () {
+        var modalScope = $scope.$new(true);
+        modalScope.search = function (query) {
+          return $scope.datasource
+              .getAvailableFilters()
+              .then(function (filters) {
+                return {
+                  'count': filters.length,
+                  'totalCount': filters.length,
+                  'rows': filters
+                };
+              });
+        };
+
+        modalScope.deferred = $q.defer();
+        modalScope.deferred.promise.then(function (filter) {
+          $scope.target.filter = filter;
+          $scope.targetBlur();
+        });
+
+        var filterSelectionModal = $modal({
+          template: './app/plugins/datasource/opennms/partials/filter.selection.html',
+          persist: true,
+          show: false,
+          scope: modalScope,
+          keyboard: false
+        });
+
+        $q.when(filterSelectionModal).then(function (modalEl) {
+          modalEl.modal('show');
+        });
+      };
+
       $scope.duplicate = function () {
         var clone = angular.copy($scope.target);
         $scope.panel.targets.push(clone);
+      };
+
+      $scope.moveMetricQuery = function(fromIndex, toIndex) {
+        _.move($scope.panel.targets, fromIndex, toIndex);
       };
 
       $scope.suggestResourceIds = function (query, callback) {
@@ -206,6 +243,10 @@ define([
             return "You must supply a label.";
           } else if (!target.expression) {
             return "You must supply an expression.";
+          }
+        } else if (target.type === "filter") {
+          if (!target.filter) {
+            return "You must select a filter.";
           }
         } else {
           return "Invalid type.";
