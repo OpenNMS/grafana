@@ -22,6 +22,8 @@ go run build.go build package
 
 * Added support for both single-valued and multi-valued template variables
 * Added support for testing the datasource, introduced in Grafana 2.1.0
+* Help information is now available in the datasource editor
+* Added support for filters, available in Horizon 17.0.0
 
 ### v1.0.0-rc1
 
