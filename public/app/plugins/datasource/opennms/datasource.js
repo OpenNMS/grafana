@@ -62,10 +62,14 @@ function (angular, _, kbn) {
       OpenNMSDatasource.prototype._buildQuery = function (options) {
         var _this = this;
 
+        var start = convertToTimestamp(options.range.from),
+            end = convertToTimestamp(options.range.to),
+            step = Math.floor((end - start) / options.maxDataPoints);
+
         var query = {
-          "start": convertToTimestamp(options.range.from),
-          "end": convertToTimestamp(options.range.to),
-          "step": Math.max(kbn.interval_to_ms(options.interval), 1),
+          "start": start,
+          "end": end,
+          "step": step,
           "maxrows": options.maxDataPoints,
           "source": [],
           "expression": [],
