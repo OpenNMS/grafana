@@ -1,12 +1,11 @@
 define([
     'angular',
     'lodash',
-    'kbn',
-    'moment',
     './queryCtrl',
-    './modalCtrl'
+    './modalCtrl',
+    './directives'
   ],
-function (angular, _, kbn) {
+function (angular, _) {
     'use strict';
 
     var module = angular.module('grafana.services');
@@ -22,7 +21,6 @@ function (angular, _, kbn) {
         this.searchLimit = 25;
 
         this.supportMetrics = true;
-        this.editorSrc = 'app/features/opennms/partials/query.editor.html';
       }
 
       // Called once per panel (graph)
@@ -62,8 +60,8 @@ function (angular, _, kbn) {
       OpenNMSDatasource.prototype._buildQuery = function (options) {
         var _this = this;
 
-        var start = convertToTimestamp(options.range.from),
-            end = convertToTimestamp(options.range.to),
+        var start = options.range.from.valueOf(),
+            end = options.range.to.valueOf(),
             step = Math.floor((end - start) / options.maxDataPoints);
 
         var query = {
@@ -72,8 +70,7 @@ function (angular, _, kbn) {
           "step": step,
           "maxrows": options.maxDataPoints,
           "source": [],
-          "expression": [],
-          "filter": []
+          "expression": []
         };
 
         _.each(options.targets, function (target) {
@@ -142,8 +139,13 @@ function (angular, _, kbn) {
               "parameter": parameters
             };
 
-            // Perform variable substitution - may generate additional expressions
-            query.filter = query.filter.concat(filter);
+            // Only add the filter attribute to the query when one or more filters are specified since
+            // OpenNMS versions before 17.0.0 do not support it
+            if (!query.filter) {
+              query,filter = [filter];
+            } else {
+              query.filter = query.filter.concat(filter);
+            }
           }
         });
 
@@ -404,15 +406,6 @@ function (angular, _, kbn) {
           return data;
         });
       };
-
-      function convertToTimestamp(date) {
-        if (date === 'now') {
-          date = new Date();
-        } else {
-          date = kbn.parseDate(date);
-        }
-        return date.getTime();
-      }
 
       return OpenNMSDatasource;
     });

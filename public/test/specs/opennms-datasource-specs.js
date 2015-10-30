@@ -1,6 +1,6 @@
 define([
-  'helpers',
-  'plugins/datasource/opennms/datasource'
+  './helpers',
+  'app/plugins/datasource/opennms/datasource'
 ], function (helpers) {
   'use strict';
 

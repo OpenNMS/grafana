@@ -5,11 +5,10 @@
   "type": "opennms",
   "serviceName": "OpenNMSDatasource",
 
-  "module": "plugins/datasource/opennms/datasource",
+  "module": "app/plugins/datasource/opennms/datasource",
 
   "partials": {
-    "config": "app/plugins/datasource/opennms/partials/config.html",
-    "query": "app/plugins/datasource/opennms/partials/query.editor.html"
+    "config": "app/plugins/datasource/opennms/partials/config.html"
   },
 
   "metrics": true

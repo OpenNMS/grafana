@@ -1,0 +1,70 @@
+
+<section class="grafana-metric-options">
+  <div class="tight-form">
+    <ul class="tight-form-list">
+      <li class="tight-form-item tight-form-item-icon">
+        <i class="fa fa-info-circle"></i>
+      </li>
+      <li class="tight-form-item">
+        <a ng-click="toggleEditorHelp(1);" bs-tooltip="'click to show helpful info'" data-placement="bottom">
+          names and labels
+        </a>
+      </li>
+      <li class="tight-form-item">
+        <a ng-click="toggleEditorHelp(2);" bs-tooltip="'click to show helpful info'" data-placement="bottom">
+          attributes
+        </a>
+      </li>
+      <li class="tight-form-item">
+        <a ng-click="toggleEditorHelp(3)" bs-tooltip="'click to show helpful info'" data-placement="bottom">
+          expressions
+        </a>
+      </li>
+      <li class="tight-form-item">
+        <a ng-click="toggleEditorHelp(4)" bs-tooltip="'click to show helpful info'" data-placement="bottom">
+          filters
+        </a>
+      </li>
+    </ul>
+    <div class="clearfix"></div>
+  </div>
+</section>
+
+<div class="editor-row">
+  <div class="pull-left" style="margin-top: 30px;">
+
+    <div class="grafana-info-box span6" ng-if="editorHelpIndex === 1">
+      <h5>Names and labels</h5>
+      <ul>
+        <li>If no label is specified, the query will be identified using the name of the attribute.</li>
+        <li>All of the series must be uniquely identified, otherwise the query will fail.</li>
+      </ul>
+    </div>
+
+    <div class="grafana-info-box span6" ng-if="editorHelpIndex === 2">
+      <h5>Attributes</h5>
+      <ul>
+        <li>Click on the label with the icon to search the available values in the node, resource and attributes fields.</li>
+        <li>When searching for a node you can match on any of these fields: label, sysName, ip address, hostname, foreign id</li>
+      </ul>
+    </div>
+
+    <div class="grafana-info-box span6" ng-if="editorHelpIndex === 3">
+      <h5>Expressions</h5>
+      <ul>
+        <li>Expressions can be used to perform calculations or simple manipulation on previous queries.</li>
+        <li>Within the expression, you can refer to other queries using their name, however these must not contain any spaces.</li>
+        <li>Values that were typically stored in strings.attributes can be reference using $label.$property i.e. ifInOctets.ifSpeed</li>
+      </ul>
+    </div>
+
+    <div class="grafana-info-box span6" ng-if="editorHelpIndex === 4">
+      <h5>Filters</h5>
+      <ul>
+        <li>Filters do not support templated values.</li>
+        <li>Filters using the R backend required 'Rscript' to be available on OpenNMS server's system path.</li>
+      </ul>
+    </div>
+
+  </div>
+</div>

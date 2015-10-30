@@ -1,368 +1,291 @@
-<div class="editor-row" style="margin-top: 10px;">
+<div class="tight-form-container-no-item-borders">
+  <div class="tight-form">
+      <ul class="tight-form-list pull-right">
+          <li class="tight-form-item">
+              <a bs-tooltip="target.error"
+                 style="color: rgb(229, 189, 28)"
+                 ng-show="target.error">
+                  <i class="fa fa-warning"></i>
+              </a>
+          </li>
+          <li class="tight-form-item">
+              <div class="dropdown">
+                  <a class="pointer dropdown-toggle"
+                     data-toggle="dropdown"
+                     tabindex="1">
+                      <i class="fa fa-bars"></i>
+                  </a>
+                  <ul class="dropdown-menu pull-right" role="menu">
+                      <li role="menuitem">
+                          <a  tabindex="1"
+                              ng-click="duplicate()">
+                              Duplicate
+                          </a>
+                      </li>
+                      <li role="menuitem">
+                          <a  tabindex="1"
+                              ng-click="moveMetricQuery($index, $index-1)">
+                              Move up
+                          </a>
+                      </li>
+                      <li role="menuitem">
+                          <a  tabindex="1"
+                              ng-click="moveMetricQuery($index, $index+1)">
+                              Move down
+                          </a>
+                      </li>
+                  </ul>
+              </div>
+          </li>
+          <li class="tight-form-item last">
+              <a class="pointer" tabindex="1" ng-click="removeDataQuery(target)">
+                  <i class="fa fa-remove"></i>
+              </a>
+          </li>
+      </ul>
 
-    <div ng-repeat="target in panel.targets"
-         class="tight-form-container"
-         ng-class="{'tight-form-disabled': target.hide}"
-         ng-controller="OpenNMSQueryCtrl"
-         ng-init="init()">
+      <ul class="tight-form-list">
+          <li>
+              <a class="tight-form-item"
+                 ng-click="target.hide = !target.hide; get_data();"
+                 role="menuitem">
+                  <i class="fa fa-eye" ng-class="{invisible: target.type === 'filter'}"></i>
+              </a>
+          </li>
+      </ul>
 
-        <div class="tight-form">
-            <ul class="tight-form-list pull-right">
-                <li class="tight-form-item">
-                    <a bs-tooltip="target.error"
-                       style="color: rgb(229, 189, 28)"
-                       ng-show="target.error">
-                        <i class="fa fa-warning"></i>
-                    </a>
-                </li>
-                <li class="tight-form-item">
-                    <div class="dropdown">
-                        <a class="pointer dropdown-toggle"
-                           data-toggle="dropdown"
-                           tabindex="1">
-                            <i class="fa fa-bars"></i>
-                        </a>
-                        <ul class="dropdown-menu pull-right" role="menu">
-                            <li role="menuitem">
-                                <a  tabindex="1"
-                                    ng-click="duplicate()">
-                                    Duplicate
-                                </a>
-                            </li>
-                            <li role="menuitem">
-                                <a  tabindex="1"
-                                    ng-click="moveMetricQuery($index, $index-1)">
-                                    Move up
-                                </a>
-                            </li>
-                            <li role="menuitem">
-                                <a  tabindex="1"
-                                    ng-click="moveMetricQuery($index, $index+1)">
-                                    Move down
-                                </a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-                <li class="tight-form-item last">
-                    <a class="pointer" tabindex="1" ng-click="removeDataQuery(target)">
-                        <i class="fa fa-remove"></i>
-                    </a>
-                </li>
-            </ul>
+      <div class="tight-form">
+          <ul class="tight-form-list">
+              <li class="tight-form-item query-keyword" style="width: 105px;">
+                  Type
+              </li>
 
-            <ul class="tight-form-list">
-                <li>
-                    <a class="tight-form-item"
-                       ng-click="target.hide = !target.hide; get_data();"
-                       role="menuitem">
-                        <i class="fa fa-eye" ng-class="{invisible: target.type === 'filter'}"></i>
-                    </a>
-                </li>
-            </ul>
+              <li>
+                  <select class="tight-form-input input-xlarge"
+                          ng-model="target.type"
+                          ng-blur="targetBlur()">
+                      <option value="attribute">Attribute</option>
+                      <option value="expression">Expression</option>
+                      <option value="filter">Filter</option>
+                  </select>
+              </li>
+          </ul>
 
-            <div class="tight-form">
-                <ul class="tight-form-list">
-                    <li class="tight-form-item query-keyword" style="width: 105px;">
-                        Type
-                    </li>
+          <div class="clearfix"></div>
+      </div>
 
-                    <li>
-                        <select class="tight-form-input input-xlarge"
-                                ng-model="target.type"
-                                ng-blur="targetBlur()">
-                            <option value="attribute">Attribute</option>
-                            <option value="expression">Expression</option>
-                            <option value="filter">Filter</option>
-                        </select>
-                    </li>
-                </ul>
+      <div ng-show="target.type === 'filter'">
 
-                <div class="clearfix"></div>
-            </div>
+          <ul class="tight-form-list">
+              <li class="tight-form-item">
+                  <i class="fa fa-eye invisible"></i>
+              </li>
 
-            <div ng-show="target.type === 'filter'">
+              <li>
+                  <a class="tight-form-item  query-keyword" style="width: 105px;"
+                     ng-click="openFilterSelectionModal();"
+                     role="menuitem">
+                      Filter <i class="fa fa-filter"></i>
+                  </a>
+              </li>
 
-                <ul class="tight-form-list">
-                    <li class="tight-form-item">
-                        <i class="fa fa-eye invisible"></i>
-                    </li>
+              <li>
+                  <input type="text"
+                         class="tight-form-input input-xlarge"
+                         ng-model="target.filter.name"
+                         spellcheck='false'
 
-                    <li>
-                        <a class="tight-form-item  query-keyword" style="width: 105px;"
-                           ng-click="openFilterSelectionModal();"
-                           role="menuitem">
-                            Filter <i class="fa fa-filter"></i>
-                        </a>
-                    </li>
+                         placeholder="filter type name"
+                         data-min-length=0 data-items=100
+                         ng-blur="targetBlur()"
+                          >
+              </li>
 
-                    <li>
-                        <input type="text"
-                               class="tight-form-input input-xlarge"
-                               ng-model="target.filter.name"
-                               spellcheck='false'
+              <div class="clearfix"></div>
 
-                               placeholder="filter type name"
-                               data-min-length=0 data-items=100
-                               ng-blur="targetBlur()"
-                                >
-                    </li>
+              <div data-ng-repeat="param in target.filter.parameter">
+                  <ul class="tight-form-list">
+                      <li class="tight-form-item">
+                          <i class="fa fa-eye invisible"></i>
+                      </li>
 
-                    <div class="clearfix"></div>
+                      <li class="tight-form-item query-keyword" style="width: 105px;">
+                          {{ param.displayName }}
+                      </li>
 
-                    <div data-ng-repeat="param in target.filter.parameter">
-                        <ul class="tight-form-list">
-                            <li class="tight-form-item">
-                                <i class="fa fa-eye invisible"></i>
-                            </li>
+                      <li>
+                          <input type="text"
+                                 class="tight-form-input input-xlarge"
+                                 ng-model="target.filterParameters[param.key]"
+                                 spellcheck='false'
+                                 placeholder="{{ param.default != null ? param.default : '' }}"
+                                 data-min-length=0 data-items=100
+                                 ng-blur="targetBlur()"
+                                  >
+                      </li>
 
-                            <li class="tight-form-item query-keyword" style="width: 105px;">
-                                {{ param.displayName }}
-                            </li>
+                      <li class="help-block" style="margin-left: 5px">
+                          {{ param.description }}
+                      </li>
+                  </ul>
 
-                            <li>
-                                <input type="text"
-                                       class="tight-form-input input-xlarge"
-                                       ng-model="target.filterParameters[param.key]"
-                                       spellcheck='false'
-                                       placeholder="{{ param.default != null ? param.default : '' }}"
-                                       data-min-length=0 data-items=100
-                                       ng-blur="targetBlur()"
-                                        >
-                            </li>
+                  <div class="clearfix"></div>
+              </div>
+          </ul>
+      </div>
 
-                            <li class="help-block" style="margin-left: 5px">
-                                {{ param.description }}
-                            </li>
-                        </ul>
+      <div ng-show="target.type === 'expression'">
 
-                        <div class="clearfix"></div>
-                    </div>
-                </ul>
-            </div>
+          <ul class="tight-form-list">
+              <li class="tight-form-item">
+                  <i class="fa fa-eye invisible"></i>
+              </li>
 
-            <div ng-show="target.type === 'expression'">
+              <li class="tight-form-item query-keyword" style="width: 105px;">
+                  Expression <i class="fa fa-calculator"></i>
+              </li>
 
-                <ul class="tight-form-list">
-                    <li class="tight-form-item">
-                        <i class="fa fa-eye invisible"></i>
-                    </li>
+              <li>
+                  <input type="text"
+                         class="tight-form-input input-xxlarge"
+                         ng-model="target.expression"
+                         spellcheck='false'
+                         placeholder="series expression"
+                         data-min-length=0 data-items=2048
+                         ng-blur="targetBlur()"
+                          />
+              </li>
+          </ul>
+      </div>
 
-                    <li class="tight-form-item query-keyword" style="width: 105px;">
-                        Expression <i class="fa fa-calculator"></i>
-                    </li>
+      <div ng-show="target.type === 'attribute'">
+          <ul class="tight-form-list">
+              <li class="tight-form-item">
+                  <i class="fa fa-eye invisible"></i>
+              </li>
 
-                    <li>
-                        <input type="text"
-                               class="tight-form-input input-xxlarge"
-                               ng-model="target.expression"
-                               spellcheck='false'
-                               placeholder="series expression"
-                               data-min-length=0 data-items=2048
-                               ng-blur="targetBlur()"
-                                />
-                    </li>
-                </ul>
-            </div>
+              <li>
+                  <a class="tight-form-item  query-keyword" style="width: 105px;"
+                     ng-click="openNodeSelectionModal();"
+                     role="menuitem">
+                      Node <i class="fa fa-tree"></i>
+                  </a>
+              </li>
 
-            <div ng-show="target.type === 'attribute'">
-                <ul class="tight-form-list">
-                    <li class="tight-form-item">
-                        <i class="fa fa-eye invisible"></i>
-                    </li>
+              <li>
+                  <input type="text"
+                         class="tight-form-input input-xlarge"
+                         ng-model="target.nodeId"
+                         spellcheck='false'
 
-                    <li>
-                        <a class="tight-form-item  query-keyword" style="width: 105px;"
-                           ng-click="openNodeSelectionModal();"
-                           role="menuitem">
-                            Node <i class="fa fa-tree"></i>
-                        </a>
-                    </li>
+                         placeholder="node id"
+                         data-min-length=0 data-items=100
+                         ng-blur="targetBlur()"
+                          >
+              </li>
+          </ul>
 
-                    <li>
-                        <input type="text"
-                               class="tight-form-input input-xlarge"
-                               ng-model="target.nodeId"
-                               spellcheck='false'
+          <div class="clearfix"></div>
 
-                               placeholder="node id"
-                               data-min-length=0 data-items=100
-                               ng-blur="targetBlur()"
-                                >
-                    </li>
-                </ul>
+          <div ng-show="target.nodeId">
+              <ul class="tight-form-list">
+                  <li class="tight-form-item">
+                      <i class="fa fa-eye invisible"></i>
+                  </li>
 
-                <div class="clearfix"></div>
+                  <li>
+                      <a class="tight-form-item query-keyword" style="width: 105px;"
+                         ng-click="openResourceSelectionModal();"
+                         role="menuitem">
+                          Resource <i class="fa fa-leaf"></i>
+                      </a>
+                  </li>
 
-                <div ng-show="target.nodeId">
-                    <ul class="tight-form-list">
-                        <li class="tight-form-item">
-                            <i class="fa fa-eye invisible"></i>
-                        </li>
+                  <li>
+                      <input type="text"
+                             class="tight-form-input input-xlarge"
+                             ng-model="target.resourceId"
+                             spellcheck='false'
+                             placeholder="resource id"
+                             data-min-length=0 data-items=100
+                             ng-blur="targetBlur()"
+                              >
+                  </li>
+              </ul>
 
-                        <li>
-                            <a class="tight-form-item query-keyword" style="width: 105px;"
-                               ng-click="openResourceSelectionModal();"
-                               role="menuitem">
-                                Resource <i class="fa fa-leaf"></i>
-                            </a>
-                        </li>
+              <div class="clearfix"></div>
+          </div>
 
-                        <li>
-                            <input type="text"
-                                   class="tight-form-input input-xlarge"
-                                   ng-model="target.resourceId"
-                                   spellcheck='false'
-                                   placeholder="resource id"
-                                   data-min-length=0 data-items=100
-                                   ng-blur="targetBlur()"
-                                    >
-                        </li>
-                    </ul>
+          <div ng-show="target.resourceId">
+              <ul class="tight-form-list">
+                  <li class="tight-form-item">
+                      <i class="fa fa-eye invisible"></i>
+                  </li>
 
-                    <div class="clearfix"></div>
-                </div>
+                  <li>
+                      <a class="tight-form-item query-keyword" style="width: 105px;"
+                         ng-click="openAttributeSelectionModal();"
+                         role="menuitem">
+                          Attribute <i class="fa fa-tag"></i>
+                      </a>
+                  </li>
 
-                <div ng-show="target.resourceId">
-                    <ul class="tight-form-list">
-                        <li class="tight-form-item">
-                            <i class="fa fa-eye invisible"></i>
-                        </li>
+                  <li>
+                      <input type="text"
+                             class="tight-form-input input-xlarge"
+                             ng-model="target.attribute"
+                             spellcheck='false'
+                             placeholder="attribute"
+                             data-min-length=0 data-items=100
+                             ng-blur="targetBlur()"
+                              >
+                  </li>
+              </ul>
 
-                        <li>
-                            <a class="tight-form-item query-keyword" style="width: 105px;"
-                               ng-click="openAttributeSelectionModal();"
-                               role="menuitem">
-                                Attribute <i class="fa fa-tag"></i>
-                            </a>
-                        </li>
+              <div class="clearfix"></div>
 
-                        <li>
-                            <input type="text"
-                                   class="tight-form-input input-xlarge"
-                                   ng-model="target.attribute"
-                                   spellcheck='false'
-                                   placeholder="attribute"
-                                   data-min-length=0 data-items=100
-                                   ng-blur="targetBlur()"
-                                    >
-                        </li>
-                    </ul>
+              <ul class="tight-form-list">
+                  <li class="tight-form-item">
+                      <i class="fa fa-eye invisible"></i>
+                  </li>
 
-                    <div class="clearfix"></div>
+                  <li class="tight-form-item query-keyword" style="width: 105px;">
+                      Aggregation <i class="fa fa-calculator"></i>
+                  </li>
 
-                    <ul class="tight-form-list">
-                        <li class="tight-form-item">
-                            <i class="fa fa-eye invisible"></i>
-                        </li>
+                  <li>
+                      <select class="tight-form-input input-xlarge"
+                              ng-model="target.aggregation"
+                              ng-blur="targetBlur()">
+                          <option value="AVERAGE">Average</option>
+                          <option value="MIN">Min</option>
+                          <option value="MAX">Max</option>
+                          <option value="LAST">Last</option>
+                      </select>
+                  </li>
+              </ul>
+          </div>
+      </div>
 
-                        <li class="tight-form-item query-keyword" style="width: 105px;">
-                            Aggregation <i class="fa fa-calculator"></i>
-                        </li>
+      <div ng-show="target.type !== 'filter'">
+          <ul class="tight-form-list pull-right">
+              <li class="tight-form-item">
+                  Label <i class="fa fa-font"></i>
+              </li>
+              <li>
+                  <input type="text"
+                         class="tight-form-input input-large"
+                         ng-model="target.label"
+                         spellcheck='false'
+                         placeholder="series label"
+                         data-min-length=0 data-items=100
+                         ng-blur="targetBlur()"
+                          />
+              </li>
+          </ul>
+      </div>
 
-                        <li>
-                            <select class="tight-form-input input-xlarge"
-                                    ng-model="target.aggregation"
-                                    ng-blur="targetBlur()">
-                                <option value="AVERAGE">Average</option>
-                                <option value="MIN">Min</option>
-                                <option value="MAX">Max</option>
-                                <option value="LAST">Last</option>
-                            </select>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div ng-show="target.type !== 'filter'">
-                <ul class="tight-form-list pull-right">
-                    <li class="tight-form-item">
-                        Label <i class="fa fa-font"></i>
-                    </li>
-                    <li>
-                        <input type="text"
-                               class="tight-form-input input-large"
-                               ng-model="target.label"
-                               spellcheck='false'
-                               placeholder="series label"
-                               data-min-length=0 data-items=100
-                               ng-blur="targetBlur()"
-                                />
-                    </li>
-                </ul>
-            </div>
-
-            <div class="clearfix"></div>
-        </div>
-    </div>
+      <div class="clearfix"></div>
+  </div>
 </div>
 
-<section class="grafana-metric-options">
-    <div class="tight-form">
-        <ul class="tight-form-list">
-            <li class="tight-form-item tight-form-item-icon">
-                <i class="fa fa-info-circle"></i>
-            </li>
-            <li class="tight-form-item">
-                <a ng-click="toggleEditorHelp(1);" bs-tooltip="'click to show helpful info'" data-placement="bottom">
-                    names and labels
-                </a>
-            </li>
-            <li class="tight-form-item">
-                <a ng-click="toggleEditorHelp(2);" bs-tooltip="'click to show helpful info'" data-placement="bottom">
-                    attributes
-                </a>
-            </li>
-            <li class="tight-form-item">
-                <a ng-click="toggleEditorHelp(3)" bs-tooltip="'click to show helpful info'" data-placement="bottom">
-                    expressions
-                </a>
-            </li>
-            <li class="tight-form-item">
-                <a ng-click="toggleEditorHelp(4)" bs-tooltip="'click to show helpful info'" data-placement="bottom">
-                    filters
-                </a>
-            </li>
-        </ul>
-        <div class="clearfix"></div>
-    </div>
-</section>
-
-<div class="editor-row">
-    <div class="pull-left" style="margin-top: 30px;">
-
-        <div class="grafana-info-box span6" ng-if="editorHelpIndex === 1">
-            <h5>Names and labels</h5>
-            <ul>
-                <li>If no label is specified, the query will be identified using the name of the attribute.</li>
-                <li>All of the series must be uniquely identified, otherwise the query will fail.</li>
-            </ul>
-        </div>
-
-        <div class="grafana-info-box span6" ng-if="editorHelpIndex === 2">
-            <h5>Attributes</h5>
-            <ul>
-                <li>Click on the label with the icon to search the available values in the node, resource and attributes fields.</li>
-                <li>When searching for a node you can match on any of these fields: label, sysName, ip address, hostname, foreign id</li>
-            </ul>
-        </div>
-
-        <div class="grafana-info-box span6" ng-if="editorHelpIndex === 3">
-            <h5>Expressions</h5>
-            <ul>
-                <li>Expressions can be used to perform calculations or simple manipulation on previous queries.</li>
-                <li>Within the expression, you can refer to other queries using their name, however these must not contain any spaces.</li>
-                <li>Values that were typically stored in strings.attributes can be reference using $label.$property i.e. ifInOctets.ifSpeed</li>
-            </ul>
-        </div>
-
-        <div class="grafana-info-box span6" ng-if="editorHelpIndex === 4">
-            <h5>Filters</h5>
-            <ul>
-                <li>Filters do not support templated values.</li>
-                <li>Filters using the R backend required 'Rscript' to be available on OpenNMS server's system path.</li>
-            </ul>
-        </div>
-
-    </div>
-</div>
