@@ -263,14 +263,14 @@ func createOpennmsPackages() {
                 packageType:            "deb",
                 homeDir:                "/usr/share/grafana",
 
-                depends: []string{"grafana > 2.1.0"},
+                depends: []string{"grafana > 2.4.0"},
         })
 
         createOpennmsPackage(linuxPackageOptions{
                 packageType:            "rpm",
                 homeDir:                "/usr/share/grafana",
 
-                depends: []string{"grafana > 2.1.0"},
+                depends: []string{"grafana > 2.4.0"},
         })
 }
 
@@ -301,7 +301,7 @@ func createOpennmsPackage(options linuxPackageOptions) {
                 args = append(args, "--iteration", opennmsPackageIteration)
         }
 
-        // add dependenciesj
+        // add dependencies
         for _, dep := range options.depends {
                 args = append(args, "--depends", dep)
         }
