@@ -1,18 +1,18 @@
 define([
   'angular',
   'lodash',
-  'kbn',
-  './influxSeries',
-  './queryBuilder',
-  './queryCtrl',
-  './funcEditor',
+  'app/core/utils/datemath',
+  './influx_series',
+  './query_builder',
+  './directives',
+  './query_ctrl',
 ],
-function (angular, _, kbn, InfluxSeries, InfluxQueryBuilder) {
+function (angular, _, dateMath, InfluxSeries, InfluxQueryBuilder) {
   'use strict';
 
   var module = angular.module('grafana.services');
 
-  module.factory('InfluxDatasource', function($q, $http, templateSrv) {
+  module.factory('InfluxDatasource', function($q, backendSrv, templateSrv) {
 
     function InfluxDatasource(datasource) {
       this.type = 'influxdb';
@@ -32,10 +32,13 @@ function (angular, _, kbn, InfluxSeries, InfluxQueryBuilder) {
 
     InfluxDatasource.prototype.query = function(options) {
       var timeFilter = getTimeFilter(options);
+      var queryTargets = [];
       var i, y;
 
       var allQueries = _.map(options.targets, function(target) {
         if (target.hide) { return []; }
+
+        queryTargets.push(target);
 
         // build query
         var queryBuilder = new InfluxQueryBuilder(target);
@@ -51,7 +54,7 @@ function (angular, _, kbn, InfluxSeries, InfluxQueryBuilder) {
       // replace templated variables
       allQueries = templateSrv.replace(allQueries, options.scopedVars);
       return this._seriesQuery(allQueries).then(function(data) {
-        if (!data || !data.results || !data.results[0].series) {
+        if (!data || !data.results) {
           return [];
         }
 
@@ -60,7 +63,7 @@ function (angular, _, kbn, InfluxSeries, InfluxQueryBuilder) {
           var result = data.results[i];
           if (!result || !result.series) { continue; }
 
-          var alias = (options.targets[i] || {}).alias;
+          var alias = (queryTargets[i] || {}).alias;
           if (alias) {
             alias = templateSrv.replace(alias, options.scopedVars);
           }
@@ -75,7 +78,7 @@ function (angular, _, kbn, InfluxSeries, InfluxQueryBuilder) {
     };
 
     InfluxDatasource.prototype.annotationQuery = function(annotation, rangeUnparsed) {
-      var timeFilter = getTimeFilter({ range: rangeUnparsed });
+      var timeFilter = getTimeFilter({ rangeRaw: rangeUnparsed });
       var query = annotation.query.replace('$timeFilter', timeFilter);
       query = templateSrv.replace(query);
 
@@ -158,23 +161,23 @@ function (angular, _, kbn, InfluxSeries, InfluxQueryBuilder) {
         options.headers.Authorization = self.basicAuth;
       }
 
-      return $http(options).then(function(result) {
+      return backendSrv.datasourceRequest(options).then(function(result) {
         return result.data;
-      }, function(reason) {
-        if (reason.status !== 0 || reason.status >= 300) {
-          if (reason.data && reason.data.error) {
-            throw { message: 'InfluxDB Error Response: ' + reason.data.error };
+      }, function(err) {
+        if (err.status !== 0 || err.status >= 300) {
+          if (err.data && err.data.error) {
+            throw { message: 'InfluxDB Error Response: ' + err.data.error, data: err.data, config: err.config };
           }
           else {
-            throw { messsage: 'InfluxDB Error: ' + reason.message };
+            throw { messsage: 'InfluxDB Error: ' + err.message, data: err.data, config: err.config };
           }
         }
       });
     };
 
     function getTimeFilter(options) {
-      var from = getInfluxTime(options.range.from);
-      var until = getInfluxTime(options.range.to);
+      var from = getInfluxTime(options.rangeRaw.from, false);
+      var until = getInfluxTime(options.rangeRaw.to, true);
       var fromIsAbsolute = from[from.length-1] === 's';
 
       if (until === 'now()' && !fromIsAbsolute) {
@@ -184,16 +187,17 @@ function (angular, _, kbn, InfluxSeries, InfluxQueryBuilder) {
       return 'time > ' + from + ' and time < ' + until;
     }
 
-    function getInfluxTime(date) {
+    function getInfluxTime(date, roundUp) {
       if (_.isString(date)) {
-        return date.replace('now', 'now()').replace('-', ' - ');
+        if (date === 'now') {
+          return 'now()';
+        }
+        if (date.indexOf('now-') >= 0 && date.indexOf('/') === -1) {
+          return date.replace('now', 'now()').replace('-', ' - ');
+        }
+        date = dateMath.parse(date, roundUp);
       }
-
-      return to_utc_epoch_seconds(date);
-    }
-
-    function to_utc_epoch_seconds(date) {
-      return (date.getTime() / 1000).toFixed(0) + 's';
+      return (date.valueOf() / 1000).toFixed(0) + 's';
     }
 
     return InfluxDatasource;

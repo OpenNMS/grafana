@@ -1,5 +1,5 @@
 define([
-  'features/dashboard/dashboardSrv'
+  'app/features/dashboard/dashboardSrv'
 ], function() {
   'use strict';
 
@@ -30,9 +30,7 @@ define([
 
       it('should have default properties', function() {
         expect(model.rows.length).to.be(0);
-        expect(model.nav.length).to.be(1);
       });
-
     });
 
     describe('when getting next panel id', function() {
@@ -49,6 +47,39 @@ define([
       });
     });
 
+    describe('addDataQueryTo', function() {
+      var dashboard, panel;
+
+      beforeEach(function() {
+        panel = {targets:[]};
+        dashboard = _dashboardSrv.create({});
+        dashboard.rows.push({panels: [panel]});
+      });
+
+      it('should add target', function() {
+        dashboard.addDataQueryTo(panel);
+        expect(panel.targets.length).to.be(1);
+      });
+
+      it('should set refId', function() {
+        dashboard.addDataQueryTo(panel);
+        expect(panel.targets[0].refId).to.be('A');
+      });
+
+      it('should set refId to first available letter', function() {
+        panel.targets = [{refId: 'A'}];
+        dashboard.addDataQueryTo(panel);
+        expect(panel.targets[1].refId).to.be('B');
+      });
+
+      it('duplicate should get unique refId', function() {
+        panel.targets = [{refId: 'A'}];
+        dashboard.duplicateDataQuery(panel, panel.targets[0]);
+        expect(panel.targets[1].refId).to.be('B');
+      });
+
+    });
+
     describe('row and panel manipulation', function() {
       var dashboard;
 
@@ -63,7 +94,7 @@ define([
 
       it('adding default should split span in half', function() {
         dashboard.rows = [{ panels: [{ span: 12, id: 7 }] }];
-        dashboard.add_panel({span: 4}, dashboard.rows[0]);
+        dashboard.addPanel({span: 4}, dashboard.rows[0]);
 
         expect(dashboard.rows[0].panels[0].span).to.be(6);
         expect(dashboard.rows[0].panels[1].span).to.be(6);
@@ -121,7 +152,10 @@ define([
           rows: [
             {
               panels: [
-                {type: 'graphite', legend: true, aliasYAxis: { test: 2 }, grid: { min: 1, max: 10 }}
+                {
+                  type: 'graphite', legend: true, aliasYAxis: { test: 2 }, grid: { min: 1, max: 10 },
+                  targets: [{refId: 'A'}, {}],
+                }
               ]
             }
           ]
@@ -147,6 +181,10 @@ define([
         expect(graph.type).to.be('graph');
       });
 
+      it('queries without refId should get it', function() {
+        expect(graph.targets[1].refId).to.be('B');
+      });
+
       it('update legend setting', function() {
         expect(graph.legend.show).to.be(true);
       });
@@ -166,7 +204,7 @@ define([
       });
 
       it('dashboard schema version should be set to latest', function() {
-        expect(model.schemaVersion).to.be(6);
+        expect(model.schemaVersion).to.be(7);
       });
 
     });
