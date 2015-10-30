@@ -142,7 +142,7 @@ function (angular, _) {
             // Only add the filter attribute to the query when one or more filters are specified since
             // OpenNMS versions before 17.0.0 do not support it
             if (!query.filter) {
-              query,filter = [filter];
+              query.filter = [filter];
             } else {
               query.filter = query.filter.concat(filter);
             }
