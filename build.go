@@ -30,7 +30,7 @@ var (
 	linuxPackageVersion   string = "v1"
 	linuxPackageIteration string = ""
 	opennmsPackageVersion string = "1.1.0"
-	opennmsPackageIteration string = ""
+	opennmsPackageIteration string = "2"
 	datasourcePluginDir string = "public/app/plugins/datasource"
 	opennmsPluginName string = "opennms"
 	race                  bool
@@ -297,7 +297,7 @@ func createOpennmsPackage(options linuxPackageOptions) {
                 "-p", "./dist",
         }
 
-        if linuxPackageIteration != "" {
+        if opennmsPackageIteration != "" {
                 args = append(args, "--iteration", opennmsPackageIteration)
         }
 
