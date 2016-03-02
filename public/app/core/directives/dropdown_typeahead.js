@@ -45,16 +45,25 @@ function (_, $, coreModule) {
         }
 
         var typeaheadValues = _.reduce($scope.menuItems, function(memo, value, index) {
-          _.each(value.submenu, function(item, subIndex) {
-            item.click = 'menuItemSelected(' + index + ',' + subIndex + ')';
-            memo.push(value.text + ' ' + item.text);
-          });
+          if (!value.submenu) {
+            value.click = 'menuItemSelected(' + index + ')';
+            memo.push(value.text);
+          } else {
+            _.each(value.submenu, function(item, subIndex) {
+              item.click = 'menuItemSelected(' + index + ',' + subIndex + ')';
+              memo.push(value.text + ' ' + item.text);
+            });
+          }
           return memo;
         }, []);
 
         $scope.menuItemSelected = function(index, subIndex) {
-          var item = $scope.menuItems[index];
-          $scope.dropdownTypeaheadOnSelect({$item: item, $subItem: item.submenu[subIndex]});
+          var menuItem = $scope.menuItems[index];
+          var payload = {$item: menuItem};
+          if (menuItem.submenu && subIndex !== void 0) {
+            payload.$subItem = menuItem.submenu[subIndex];
+          }
+          $scope.dropdownTypeaheadOnSelect(payload);
         };
 
         $input.attr('data-provide', 'typeahead');
@@ -67,8 +76,8 @@ function (_, $, coreModule) {
             _.each($scope.menuItems, function(menuItem) {
               _.each(menuItem.submenu, function(submenuItem) {
                 if (value === (menuItem.text + ' ' + submenuItem.text)) {
-                  result.$item = menuItem;
                   result.$subItem = submenuItem;
+                  result.$item = menuItem;
                 }
               });
             });

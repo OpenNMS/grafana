@@ -6,7 +6,7 @@ Take a look at our [Wiki page](http://www.opennms.org/wiki/Grafana) for details 
 
 ## Notes on this repository
 
-The *features/opennms* branch of this repository should be kept up-to-date with the latest Grafana release (current 2.5.0).
+The *features/opennms* branch of this repository should be kept up-to-date with the latest Grafana release (current 2.6.0).
 
 Refer to the Grafana's documentation for details on building from source.
 
