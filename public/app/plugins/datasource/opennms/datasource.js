@@ -47,6 +47,40 @@ function (angular, _) {
         });
       };
 
+      OpenNMSDatasource.prototype.metricFindQuery = function (query) {
+        var interpolatedQuery;
+        try {
+          interpolatedQuery = templateSrv.replace(query);
+        }
+        catch (err) {
+          return $q.reject(err);
+        }
+
+        var nodeFilterRegex = /nodeFilter\((.*)\)/;
+
+        if (interpolatedQuery !== undefined) {
+          var nodeFilterQuery = interpolatedQuery.match(nodeFilterRegex);
+          if (nodeFilterQuery) {
+            return this._onmsRequest('GET', '/rest/nodes?filterRule=' + encodeURIComponent(nodeFilterQuery[1])).then(function (nodelist) {
+              if (nodelist.count > nodelist.totalCount) {
+                console.warn("Filter matches " + nodelist.totalCount + " records, but only " + nodelist.count + " will be used.");
+              }
+              var results = [];
+              _.each(nodelist.node, function(node) {
+                var nodeCriteria = "" + node.id;
+                if (node.foreignId !== null && node.foreignSource !== null) {
+                  nodeCriteria = node.foreignSource + ":" + node.foreignId;
+                }
+                results.push({text: nodeCriteria, expandable: true});
+              });
+              return results;
+            });
+          }
+        }
+
+        return $q.when([]);
+      };
+
       OpenNMSDatasource.prototype.testDatasource = function() {
         return this._onmsRequest('GET', '/rest/info').then(function () {
           return { status: "success", message: "Data source is working", title: "Success" };
@@ -153,14 +187,22 @@ function (angular, _) {
       };
 
       OpenNMSDatasource.prototype._interpolateSourceVariables = function(source) {
-        return this.__interpolateVariables(source, ['resourceId', 'attribute', 'label']);
+        return this.__interpolateVariables(source, ['resourceId', 'attribute', 'label'], function(source) {
+          // If we reference a variable in the node field, we will default to using the node[] resource type
+          // even though the variable may contain a reference to the foreign source/id criteria.
+          // If we hit such a case, replace the node[] resource type with the nodeSource resource type
+          var nodeResourceRegex = /node\[(.*?):(.*?)\].*/;
+          if (source.resourceId !== undefined && source.resourceId.match(nodeResourceRegex)) {
+            source.resourceId = source.resourceId.replace(/^node/, "nodeSource");
+          }
+        });
       };
 
       OpenNMSDatasource.prototype.__interpolateExpressionVariables = function(expression) {
         return this.__interpolateVariables(expression, ['value', 'label']);
       };
 
-      OpenNMSDatasource.prototype.__interpolateVariables = function(query, keys) {
+      OpenNMSDatasource.prototype.__interpolateVariables = function(query, keys, callback) {
 
         // Collect the list of variables that are referenced in one or more of the keys
         var referencedVariables = [];
@@ -194,6 +236,12 @@ function (angular, _) {
           _.each(keys, function(key) {
             q[key] = templateSrv.replace(q[key], mapOfReferencedVariables);
           });
+
+          if (callback !== undefined) {
+            // Allows the caller to make any required updates after the variable
+            // substitution has been performed
+            callback(q);
+          }
 
           queries.push(q);
         });

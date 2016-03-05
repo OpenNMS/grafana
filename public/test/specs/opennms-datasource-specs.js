@@ -119,6 +119,68 @@ define([
         expect(request.source[2].attribute).to.be("2-x");
         expect(request.source[3].attribute).to.be("2-y");
       });
+
+      it('should refer to nodeSource[] or node[] resources based on the resolved values', function () {
+        ctx.templateSrv.init([
+          { name: 'nodes', current: { value: ['1', '2', 'FS:FID'] }}
+        ]);
+
+        var query = {
+          range: {from: 'now-1h', to: 'now'},
+          targets: [{type:"attribute", nodeId: '$nodes', resourceId: 'nodeSnmp[]', attribute: 'loadavg1', aggregation: 'AVERAGE'}],
+          interval: '1s'
+        };
+
+        ctx.ds.query(query);
+
+        ctx.$httpBackend.flush();
+        ctx.$httpBackend.verifyNoOutstandingExpectation();
+
+        expect(request.source.length).to.be(3);
+        expect(request.source[0].resourceId).to.be("node[1].nodeSnmp[]");
+        expect(request.source[1].resourceId).to.be("node[2].nodeSnmp[]");
+        expect(request.source[2].resourceId).to.be("nodeSource[FS:FID].nodeSnmp[]");
+      });
+    });
+
+    describe('Metric queries', function () {
+      it('can retrieve nodes by filter', function () {
+
+        ctx.$httpBackend.expect('GET', "/rest/nodes?filterRule=(IPADDR%20!%3D%20'0.0.0.0')%20%26%20" +
+                                          "catincProduction%20%26%20catincLinux").respond({
+          "count": 2,
+          "offset": null,
+          "totalCount": 2,
+          "node": [
+            {
+              "label": "node1",
+              "categories": [],
+              "foreignSource": null,
+              "foreignId": null,
+              "id": 1
+            },
+            {
+              "label": "node2",
+              "categories": [],
+              "foreignSource": "FS",
+              "foreignId": "FID",
+              "id": 2
+            }
+          ]
+        });
+
+        var results = {};
+        ctx.ds.metricFindQuery("nodeFilter((IPADDR != '0.0.0.0') & catincProduction & catincLinux)").then(function (data) {
+          results = data;
+        });
+
+        ctx.$httpBackend.flush();
+        ctx.$httpBackend.verifyNoOutstandingExpectation();
+
+        expect(results.length).to.be(2);
+        expect(results[0].text).to.be("1");
+        expect(results[1].text).to.be("FS:FID");
+      });
     });
 
     describe('Cartesian products', function () {
