@@ -67,7 +67,7 @@ function (angular, _) {
               }
               var results = [];
               _.each(nodelist.node, function(node) {
-                var nodeCriteria = "" + node.id;
+                var nodeCriteria = node.id.toString();
                 if (node.foreignId !== null && node.foreignSource !== null) {
                   nodeCriteria = node.foreignSource + ":" + node.foreignId;
                 }
