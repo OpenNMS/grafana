@@ -143,8 +143,8 @@ define([
       });
     });
 
-    describe('Metric queries', function () {
-      it('can retrieve nodes by filter', function () {
+    describe('When using metric queries', function () {
+      it('should support retrieving nodes by filter', function () {
 
         ctx.$httpBackend.expect('GET', "/rest/nodes?filterRule=(IPADDR%20!%3D%20'0.0.0.0')%20%26%20" +
                                           "catincProduction%20%26%20catincLinux").respond({

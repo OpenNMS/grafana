@@ -254,9 +254,17 @@ function (angular, _) {
         var allValues = [];
         _.each(variables, function(variable) {
           var values;
+          if (variable.current.text === "All") { // All?
 
-          // Single-valued?
-          if (_.isString(variable.current.value)) {
+            // The user selected the "All" value, so we gather include
+            // the values of all the other possible options
+            values = [];
+            _.each(variables.options, function(option) {
+              if (option.text !== "All") {
+                values.push(option.value);
+              }
+            });
+          } else if (_.isString(variable.current.value)) { // Single-valued?
             values = [variable.current.value];
           } else {
             values = variable.current.value;
