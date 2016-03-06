@@ -149,6 +149,10 @@ function (angular, _) {
               "transient": transient
             };
 
+            if (target.subattribute !== undefined && target.subattribute !== '') {
+              source.datasource = target.subattribute;
+            }
+
             // Perform variable substitution - may generate additional queries
             query.source = query.source.concat(_this._interpolateSourceVariables(source));
           } else if (target.type === "expression") {
@@ -204,7 +208,7 @@ function (angular, _) {
       };
 
       OpenNMSDatasource.prototype._interpolateSourceVariables = function(source) {
-        return this.__interpolateVariables(source, ['resourceId', 'attribute', 'label'], function(source) {
+        return this.__interpolateVariables(source, ['resourceId', 'attribute', 'subattribute', 'label'], function(source) {
           // If we reference a variable in the node field, we will default to using the node[] resource type
           // even though the variable may contain a reference to the foreign source/id criteria.
           // If we hit such a case, replace the node[] resource type with the nodeSource resource type
