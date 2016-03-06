@@ -181,6 +181,42 @@ define([
         expect(results[0].text).to.be("1");
         expect(results[1].text).to.be("FS:FID");
       });
+
+      it('should support retrieving child resources', function () {
+
+        ctx.$httpBackend.expect('GET', "/rest/resources/node%5B2%5D?depth=1").respond({
+          "id": "node[2]",
+          "label": "internet",
+          "name": "2",
+          "link": "element/node.jsp?node=2",
+          "typeLabel": "Node",
+          "parentId": null,
+          "children": {
+            "count": 1,
+            "totalCount": 1,
+            "resource": [
+              {
+                "id": "node[2].responseTime[4.2.2.2]"
+              },
+              {
+                "id": "node[2].responseTime[8.8.8.8]"
+              }
+            ]
+          }
+        });
+
+        var results = {};
+        ctx.ds.metricFindQuery("nodeResources(2)").then(function (data) {
+          results = data;
+        });
+
+        ctx.$httpBackend.flush();
+        ctx.$httpBackend.verifyNoOutstandingExpectation();
+
+        expect(results.length).to.be(2);
+        expect(results[0].text).to.be("responseTime[4.2.2.2]");
+        expect(results[1].text).to.be("responseTime[8.8.8.8]");
+      });
     });
 
     describe('Cartesian products', function () {

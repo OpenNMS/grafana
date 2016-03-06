@@ -57,6 +57,7 @@ function (angular, _) {
         }
 
         var nodeFilterRegex = /nodeFilter\((.*)\)/;
+        var nodeResourcesRegex = /nodeResources\((.*)\)/;
 
         if (interpolatedQuery !== undefined) {
           var nodeFilterQuery = interpolatedQuery.match(nodeFilterRegex);
@@ -72,6 +73,22 @@ function (angular, _) {
                   nodeCriteria = node.foreignSource + ":" + node.foreignId;
                 }
                 results.push({text: nodeCriteria, expandable: true});
+              });
+              return results;
+            });
+          }
+
+          var nodeCriteria = interpolatedQuery.match(nodeResourcesRegex);
+          if (nodeCriteria) {
+            return this._onmsRequest('GET', '/rest/resources/' + encodeURIComponent(this._getNodeResource(nodeCriteria[1])), {
+              depth: 1
+            }).then(function (data) {
+              var results = [];
+              _.each(data.children.resource, function(resource) {
+                var resourceWithoutNodePrefix = resource.id.match(/node(Source)?\[.*?\]\.(.*)/);
+                if (resourceWithoutNodePrefix) {
+                  results.push({text: resourceWithoutNodePrefix[2], expandable: true});
+                }
               });
               return results;
             });
@@ -413,14 +430,18 @@ function (angular, _) {
         });
       };
 
-      OpenNMSDatasource.prototype._getRemoteResourceId = function (nodeId, resourceId) {
+      OpenNMSDatasource.prototype._getNodeResource = function (nodeId) {
         var prefix = "";
         if (nodeId.indexOf(":") > 0) {
           prefix = "nodeSource[";
         } else {
           prefix = "node[";
         }
-        return prefix + nodeId + "]." + resourceId;
+        return prefix + nodeId + "]";
+      };
+
+      OpenNMSDatasource.prototype._getRemoteResourceId = function (nodeId, resourceId) {
+        return this._getNodeResource(nodeId) + "." + resourceId;
       };
 
       OpenNMSDatasource.prototype.suggestAttributes = function (nodeId, resourceId, query) {
