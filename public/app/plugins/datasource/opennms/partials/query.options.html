@@ -25,6 +25,11 @@
           filters
         </a>
       </li>
+      <li class="tight-form-item">
+        <a ng-click="toggleEditorHelp(5)" bs-tooltip="'click to show helpful info'" data-placement="bottom">
+          template queries
+        </a>
+      </li>
     </ul>
     <div class="clearfix"></div>
   </div>
@@ -66,5 +71,20 @@
       </ul>
     </div>
 
+    <div class="grafana-info-box span6" ng-if="editorHelpIndex === 5">
+      <h5>Template queries</h5>
+      <ul>
+        <li>Query nodes using nodeFilter($filter), where $filter is a valid <a target="_blank" href="https://www.opennms.org/wiki/Filters">OpenNMS filter</a></li>
+        <li>Query child resources using nodeResources($nodecriteria) where $nodecriteria is the node id, or foreign source and foreign id</li>
+        <li>Examples
+          <ul>
+            <li>nodeFilter(catincProduction & catincLinux)</li>
+            <li>nodeFilter((isSMTP | isPOP3 ) & (categoryName == 'Production'))</li>
+            <li>nodeResources(1)</li>
+            <li>nodeResources(FS:FID)</li>
+          </ul>
+        </li>
+      </ul>
+    </div>
   </div>
 </div>
